@@ -1,6 +1,6 @@
 # 简介
 
-{{ PROJECT_NAME }}
+{{PROJECT_NAME}}
 
 
 ## 技术栈

@@ -1,0 +1,90 @@
+Subject: [PATCH] 🚀 feat(common/sms): 添加短信服务类以支持阿里云短信发送功能
+---
+Index: common/sms.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/sms.py b/common/sms.py
+new file mode 100644
+--- /dev/null	(date 1739126409219)
++++ b/common/sms.py	(date 1739126409219)
+@@ -0,0 +1,61 @@
++from typing import Dict, Optional
++
++from alibabacloud_dysmsapi20170525.client import Client
++from alibabacloud_dysmsapi20170525.models import SendSmsRequest
++from alibabacloud_tea_openapi.models import Config
++from alibabacloud_tea_util.models import RuntimeOptions
++
++from .configs import settings
++from .log import logger
++
++
++class SMSService:
++    """短信服务类
++    
++    用于发送阿里云短信服务
++    """
++
++    def __init__(self):
++        """初始化短信服务客户端"""
++        config = Config(
++            access_key_id=settings.aliyun_access_key_id,
++            access_key_secret=settings.aliyun_access_key_secret,
++            endpoint='dysmsapi.aliyuncs.com'
++        )
++        self.client = Client(config)
++
++    def send_sms(self, phone_number: str, template_param: Optional[Dict] = None) -> bool:
++        """发送短信
++        
++        Args:
++            phone_number: 手机号码
++            template_param: 模板参数，例如 {"code": "1234"}
++            
++        Returns:
++            bool: 发送是否成功
++        """
++        try:
++            request = SendSmsRequest(
++                phone_numbers=phone_number,
++                sign_name=settings.sms_sign_name,
++                template_code=settings.sms_template_code,
++                template_param=str(template_param) if template_param else None
++            )
++
++            runtime = RuntimeOptions()
++            response = self.client.send_sms_with_options(request, runtime)
++
++            if response.body.code == "OK":
++                logger.info(f"短信发送成功: {phone_number}")
++                return True
++            else:
++                logger.error(f"短信发送失败: {response.body.message}")
++                return False
++
++        except Exception as e:
++            logger.error(f"短信发送异常: {str(e)}")
++            return False
++
++
++# 创建全局短信服务实例
++sms_service = SMSService()
+Index: common/__init__.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/__init__.py b/common/__init__.py
+--- a/common/__init__.py	(revision 89f6f74c9f21b06ec05e16675b0d4471e865cdf4)
++++ b/common/__init__.py	(date 1740515944662)
+@@ -5,7 +5,7 @@
+ from .models import *
+ from .redis import redis_client
+ from .routes import router
+-
++from .sms import sms_service
+ __all__ = [
+     "Error",
+     "ResponsePayloads",

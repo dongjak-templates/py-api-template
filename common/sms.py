@@ -1,3 +1,8 @@
+#handlebars-template
+#{{#if (not includeAliSms)}}
+#  {{delThisFile}}
+#{{/if}}
+#end-handlebars-template
 from typing import Dict, Optional
 
 from alibabacloud_dysmsapi20170525.client import Client

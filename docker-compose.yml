@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres
+    container_name: asm-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: asm
+      PGDATA: /data/postgres
+    volumes:
+      - ./pgdata:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - asm
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  asm-admin:
+    image: asm-admin
+    container_name: asm-admin
+    restart: unless-stopped
+    ports:
+      - "3112:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/asm
+      - NODE_ENV=production
+    depends_on:
+      - postgres
+    networks:
+      - asm
+  asm-py:
+    image: asm-py
+    container_name: asm-py
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/asm
+      - REDIS_HOST=asm-redis
+      - WECHAT_PAY_NOTIFY_URL=https://api.newbizai.cn/orders/notify
+      - MODE=dev
+      - COURSE_RECOMMENDER_KEY=app-OKdxKNlY2jgOMG6j7ovDZXzY
+      - DIFY_URL=https://dify.newbizai.cn/v1
+      - TZ=Asia/Shanghai
+    depends_on:
+      - postgres
+    networks:
+      - asm
+    volumes:
+      - ./logs:/app/logs
+  asm-redis:
+    image: redis
+    container_name: asm-redis
+    restart: always
+    command: redis-server --requirepass 123394 --bind 0.0.0.0 -::*
+    ports:
+      - "6379:6379"
+    networks:
+      - asm
+  gateway:
+    image: caddy
+    container_name: asm-gateway
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./gateway/Caddyfile:/etc/caddy/Caddyfile
+      - ./gateway/.certificates:/data/caddy/certificates
+    networks:
+      - asm
+networks:
+  asm:
+    driver: bridge

@@ -9,4 +9,12 @@ dependencies = [
     "fastapi>=0.115.8",
     "sqlmodel>=0.0.22",
     "uvicorn[standard]>=0.34.0",
+    "alembic>=1.14.1",
+    "bcrypt>=4.2.1",
+    "fastapi>=0.115.8",
+    "loguru>=0.7.3",
+    "pydantic-settings>=2.8.0",
+    "pyjwt>=2.10.1",
+    "redis>=5.2.1",
+    "sqlmodel>=0.0.22",
 ]

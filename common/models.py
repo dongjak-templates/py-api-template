@@ -88,10 +88,6 @@ class Settings(BaseSettings):
     aliyun_access_key_secret: str = Field(
         default=None, description="阿里云访问密钥密钥"
     )
-
-    dify_url: str = Field(default=None, description="Dify URL")
-    dify_email: str = Field(default=None, description="Dify Email")
-    dify_password: str = Field(default=None, description="Dify Password")
     redis_host: str = Field(default=None, description="Redis Host")
     redis_port: int = Field(default=None, description="Redis Port")
     redis_password: str = Field(default=None, description="Redis Password")
